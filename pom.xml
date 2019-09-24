@@ -15,6 +15,35 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+           <plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-shade-plugin</artifactId>
+  <version>2.3</version>
+  <executions>
+    <execution>
+      <phase>package</phase>
+      <goals>
+        <goal>shade</goal>
+      </goals>
+      <configuration>
+        <transformers>
+          <transformer
+            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+            <manifestEntries>
+              <Main-Class>com.techprimers.vertx.App</Main-Class>
+              <Main-Verticle>com.techprimers.vertx.App</Main-Verticle>
+            </manifestEntries>
+          </transformer>
+           	<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+            <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+            </transformer>
+        </transformers>
+        <artifactSet/>
+        <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
     </plugins>
   </build>
   <packaging>jar</packaging>
@@ -40,5 +69,17 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+ <dependency>
+   <groupId>org.apache.httpcomponents</groupId>
+   <artifactId>httpclient</artifactId>
+   <version>4.0.1</version>
+   <type>jar</type>
+ </dependency>
   </dependencies>
 </project>
