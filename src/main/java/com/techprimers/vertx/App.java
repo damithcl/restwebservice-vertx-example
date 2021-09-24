@@ -3,6 +3,7 @@ package com.techprimers.vertx;
 
 import java.util.concurrent.TimeUnit;
 
+import io.vertx.core.http.*;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -14,11 +15,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -32,8 +28,8 @@ public class App extends AbstractVerticle {
 	static JsonObject json;
     public static void main(String[] args) {
     	
-
-    	PropertyConfigurator.configure(System.getProperty("user.dir")+"/log4j.properties");
+		int port  = Integer.parseInt(args[0]);
+    	PropertyConfigurator.configure(System.getProperty("user.dir")+"\\log4j.properties");
     	final HttpServerOptions httpServerOptions = new HttpServerOptions();
     	httpServerOptions.setAcceptBacklog(10000);
     	DeploymentOptions options = new DeploymentOptions().setInstances(30);
@@ -42,16 +38,19 @@ public class App extends AbstractVerticle {
     	final Router router = Router.router(vertx);
     	vertx.deployVerticle((App.class), options);
 
-          	  Route CelcomTypeCheck = router
-	                     .get("/celcom/:msisdn/getsubscribertype")
+          	  Route OperatorTypeCheck = router
+					  //GET Endpoint
+	                     .get("/:operator/:msisdn/getsubscribertype")
 	                     .produces("application/json")
 	                     .handler(routingContext -> {
+							 String operator = routingContext.request().getParam("operator");
+							 String msisdn = routingContext.request().getParam("msisdn");
 	                    	 HttpServerResponse response = routingContext.response();
 	                      //  response.setChunked(true);
 	                         String JsonResponse = "{\n" + 
 	                         		"  \"getSubscriberTypeResponse\": {\n" + 
-	                         		"    \"msisdn\": \"60194016983\",\n" + 
-	                         		"    \"imsi\": \"502191347348042\",\n" + 
+	                         		"    \"msisdn\": \""+operator+"\",\n" +
+	                         		"    \"imsi\": \""+msisdn+"\",\n" +
 	                         		"    \"userType\": \"postpaid\",\n" + 
 	                         		"    \"userStatus\": \"Active\",\n" + 
 	                         		"    \"mvno\": \"No\"\n" + 
@@ -59,17 +58,17 @@ public class App extends AbstractVerticle {
 	                         		"}";  
 
 	        	 	                       
-	        	 	                      vertx.setTimer(TimeUnit.MILLISECONDS.toMillis(333), l -> {
+	        	 	                      vertx.setTimer(TimeUnit.MILLISECONDS.toMillis(1000), l -> {
 	        	 	                    	  json = new JsonObject(JsonResponse);
 	             	                         response.putHeader("Content-Type", "application/json; charset=UTF8")
 	             	                         .setStatusCode(200);
 	             	                        response.end(Json.encodePrettily(json));
-	             	                       LOGGER.info("-----getsubscribertype -8093----------");
+	             	                       LOGGER.info("----- called getsubscribertype on port"+port);
 	         	                          });
 	                    });
         httpServer
                 .requestHandler(router::accept)
-                .listen(8090);
+                .listen(port);
 
     }
 }
